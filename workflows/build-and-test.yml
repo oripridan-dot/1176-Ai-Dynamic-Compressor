@@ -1,1 +1,55 @@
+name: Build and Test 1176-Ai
 
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "develop" ]
+
+jobs:
+  build-macos:
+    name: Build on macOS
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        submodules: 'recursive' # Important for fetching JUCE if it's a submodule
+
+    - name: Install dependencies (CMake)
+      run: brew install cmake
+
+    - name: Configure CMake
+      run: cmake ./Project -B ./Build -G Xcode
+
+    - name: Build with CMake
+      run: cmake --build ./Build --config Release
+
+    - name: Upload AU artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: 1176-Ai-MacOS-AU
+        path: ./Build/1176Ai_artefacts/Release/AU/1176Ai.component
+
+  build-windows:
+    name: Build on Windows
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+
+    - name: Configure CMake
+      run: cmake ./Project -B ./Build
+
+    - name: Build with CMake
+      run: cmake --build ./Build --config Release
+
+    - name: Upload VST3 artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: 1176-Ai-Windows-VST3
+        path: ./Build/1176Ai_artefacts/Release/VST3/1176Ai.vst3
